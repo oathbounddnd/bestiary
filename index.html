@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bestiary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+      font-family: 'Crimson Text', serif;
+      background: #0a0a0a;
+      color: #d4c5a0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(90deg, rgba(15,12,10,0.95), rgba(10,8,6,0.85));
+      border-right: 1px solid rgba(100,80,60,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .header {
+      padding: 15px;
+      border-bottom: 1px solid rgba(100,80,60,0.3);
+      text-align: center;
+    }
+    .header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      color: #c9b896;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .search-box {
+      padding: 12px;
+      border-bottom: 1px solid rgba(100,80,60,0.3);
+    }
+    .search-box input {
+      width: 100%;
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(100,80,60,0.4);
+      color: #d4c5a0;
+      font-family: 'Crimson Text', serif;
+      font-size: 0.9rem;
+    }
+    .search-box input:focus {
+      outline: none;
+      border-color: rgba(150,120,80,0.6);
+    }
+    .creature-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+    .category {
+      margin-bottom: 2px;
+    }
+    .category-header {
+      padding: 6px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+      user-select: none;
+    }
+    .category-header:hover {
+      background: rgba(40,35,30,0.3);
+    }
+    .category-arrow {
+      width: 0;
+      height: 0;
+      border-left: 4px solid #8a7a5a;
+      border-top: 3px solid transparent;
+      border-bottom: 3px solid transparent;
+      transition: transform 0.2s;
+    }
+    .category.collapsed .category-arrow {
+      transform: rotate(-90deg);
+    }
+    .category-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      color: #8a7a5a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      flex: 1;
+    }
+    .category-count {
+      font-size: 0.75rem;
+      color: #6a5a4a;
+    }
+    .category-creatures {
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .category.collapsed .category-creatures {
+      max-height: 0;
+    }
+    .creature-item {
+      padding: 5px 15px 5px 30px;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      font-size: 0.9rem;
+    }
+    .creature-item:hover {
+      background: rgba(40,35,30,0.4);
+      border-left-color: rgba(150,120,80,0.6);
+    }
+    .creature-item.active {
+      background: rgba(50,40,30,0.6);
+      border-left-color: #c9b896;
+      color: #c9b896;
+    }
+    .scan-btn {
+      margin: 12px;
+      padding: 10px;
+      background: rgba(80,60,40,0.3);
+      border: 1px solid rgba(120,90,60,0.5);
+      color: #c9b896;
+      font-family: 'Cinzel', serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+    }
+    .scan-btn:hover {
+      background: rgba(100,75,50,0.4);
+      border-color: rgba(150,120,80,0.7);
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      position: relative;
+    }
+    .creature-display {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-direction: column;
+      gap: 30px;
+      padding: 30px;
+    }
+    .creature-image {
+      max-width: 60%;
+      max-height: 55vh;
+      object-fit: contain;
+      filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));
+    }
+    .vulnerabilities-display {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .vuln-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(0,0,0,0.6);
+      border: 2px solid rgba(100,80,60,0.5);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    }
+    .vuln-icon:hover {
+      border-color: rgba(150,120,80,0.8);
+      background: rgba(20,15,10,0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.3);
+    }
+    .info-panel {
+      width: 380px;
+      background: linear-gradient(270deg, rgba(15,12,10,0.95), rgba(10,8,6,0.85));
+      border-left: 1px solid rgba(100,80,60,0.3);
+      overflow-y: auto;
+      padding: 25px;
+    }
+    .info-title-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(100,80,60,0.4);
+      padding: 12px 15px;
+      margin-bottom: 20px;
+    }
+    .info-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      color: #c9b896;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 0;
+    }
+    .info-subtitle {
+      font-size: 0.9rem;
+      color: #8a7a5a;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    .stat-block {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(100,80,60,0.3);
+      padding: 12px;
+      margin-bottom: 18px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(100,80,60,0.2);
+    }
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+    .stat-label {
+      color: #8a7a5a;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+    .stat-value {
+      color: #d4c5a0;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      color: #c9b896;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid rgba(100,80,60,0.3);
+      padding-bottom: 6px;
+    }
+    .section-content {
+      line-height: 1.6;
+      color: #b5a585;
+      font-size: 0.9rem;
+    }
+    .empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 15px;
+      color: #6a5a4a;
+    }
+    .empty-state h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: rgba(20,15,10,0.98);
+      border: 2px solid rgba(100,80,60,0.6);
+      padding: 25px;
+      max-width: 450px;
+      width: 90%;
+      position: relative;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 12px;
+      border: 1px solid rgba(100,80,60,0.5);
+      background: rgba(80,60,40,0.3);
+      color: #c9b896;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .modal-close:hover {
+      background: rgba(100,75,50,0.4);
+    }
+    .modal h3 {
+      font-family: 'Cinzel', serif;
+      color: #c9b896;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+    }
+    .modal p {
+      color: #b5a585;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+    ::-webkit-scrollbar-thumb { background: rgba(100,80,60,0.5); }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(120,90,60,0.7); }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="header">
+      <h1>Bestiary</h1>
+    </div>
+    <div class="search-box">
+      <input type="search" id="search" placeholder="Search creatures...">
+    </div>
+    <div class="creature-list" id="creatureList"></div>
+    <button class="scan-btn" id="scanBtn">Scan QR Code</button>
+  </div>
+
+  <div class="main-content">
+    <div class="creature-display" id="creatureDisplay">
+      <div class="empty-state" id="emptyState">
+        <h2>NO CREATURE SELECTED</h2>
+        <p>Select a creature from the list or scan a QR code</p>
+      </div>
+    </div>
+    <div class="info-panel" id="infoPanel" style="display:none;">
+      <div id="infoContent"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeModal">Close</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script>
+    const STORAGE_KEY = 'bestiary_creatures';
+    const CATEGORIES = [
+      'Aberration', 'Beast', 'Celestial', 'Construct', 'Dragon',
+      'Elemental', 'Fey', 'Fiend', 'Giant', 'Humanoid',
+      'Monstrosity', 'Ooze', 'Plant', 'Undead'
+    ];
+
+    const VULNERABILITY_ICONS = {
+      acid: { icon: '💧', name: 'Acid', desc: 'Takes extra damage from acid.' },
+      bludgeoning: { icon: '🔨', name: 'Bludgeoning', desc: 'Takes extra damage from blunt force attacks.' },
+      cold: { icon: '❄️', name: 'Cold', desc: 'Takes extra damage from cold and ice.' },
+      fire: { icon: '🔥', name: 'Fire', desc: 'Takes extra damage from fire and heat.' },
+      force: { icon: '✨', name: 'Force', desc: 'Takes extra damage from pure magical force.' },
+      lightning: { icon: '⚡', name: 'Lightning', desc: 'Takes extra damage from electricity.' },
+      necrotic: { icon: '💀', name: 'Necrotic', desc: 'Takes extra damage from death magic.' },
+      piercing: { icon: '🗡️', name: 'Piercing', desc: 'Takes extra damage from piercing weapons.' },
+      poison: { icon: '☠️', name: 'Poison', desc: 'Takes extra damage from toxins and venom.' },
+      psychic: { icon: '🧠', name: 'Psychic', desc: 'Takes extra damage from mental attacks.' },
+      radiant: { icon: '☀️', name: 'Radiant', desc: 'Takes extra damage from holy light.' },
+      slashing: { icon: '⚔️', name: 'Slashing', desc: 'Takes extra damage from slashing weapons.' },
+      thunder: { icon: '🌩️', name: 'Thunder', desc: 'Takes extra damage from sonic booms.' },
+      silver: { icon: '🪙', name: 'Silver', desc: 'Vulnerable to silvered weapons.' },
+      natural: { icon: '🌿', name: 'Natural Materials', desc: 'Vulnerable to specific natural substances (wolfsbane, running water, etc.).' },
+      blinded: { icon: '👁️', name: 'Blinded', desc: 'Vulnerable when blinded.' },
+      charmed: { icon: '💖', name: 'Charmed', desc: 'Vulnerable to charm effects.' },
+      deafened: { icon: '👂', name: 'Deafened', desc: 'Vulnerable when deafened.' },
+      frightened: { icon: '😨', name: 'Frightened', desc: 'Vulnerable to fear effects.' },
+      paralyzed: { icon: '🥶', name: 'Paralyzed', desc: 'Vulnerable when paralyzed.' },
+      stunned: { icon: '💫', name: 'Stunned', desc: 'Vulnerable to stun effects.' }
+    };
+
+    const SAMPLE_CREATURES = [
+      {
+        name: 'Ancient Red Dragon',
+        category: 'Dragon',
+        size: 'Gargantuan',
+        type: 'Dragon',
+        alignment: 'Chaotic Evil',
+        ac: '22',
+        hp: '546 (28d20 + 252)',
+        speed: '40 ft., climb 40 ft., fly 80 ft.',
+        cr: '24',
+        vulnerabilities: ['cold'],
+        vulnerabilityDetails: {
+          cold: 'Red dragons despise cold and take additional damage from ice attacks.'
+        },
+        description: 'The most covetous of the true dragons, red dragons tirelessly seek to increase their treasure hoards. They are exceptionally vain, even for dragons, and their conceit is reflected in their proud bearing and their disdain for other creatures.',
+        abilities: 'Legendary Resistance (3/Day). If the dragon fails a saving throw, it can choose to succeed instead.',
+        actions: 'Multiattack. The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws.\n\nFire Breath (Recharge 5-6). The dragon exhales fire in a 90-foot cone. Each creature in that area must make a DC 24 Dexterity saving throw, taking 91 (26d6) fire damage on a failed save, or half as much damage on a successful one.'
+      },
+      {
+        name: 'Beholder',
+        category: 'Aberration',
+        size: 'Large',
+        type: 'Aberration',
+        alignment: 'Lawful Evil',
+        ac: '18',
+        hp: '180 (19d10 + 76)',
+        speed: '0 ft., fly 20 ft. (hover)',
+        cr: '13',
+        vulnerabilities: [],
+        description: 'One glance at a beholder is enough to assess its foul and otherworldly nature. Aggressive, hateful, and greedy, these aberrations dismiss all other creatures as lesser beings, toying with them or destroying them as they choose.',
+        abilities: 'Antimagic Cone. The beholder\'s central eye creates an area of antimagic, as in the antimagic field spell, in a 150-foot cone.',
+        actions: 'Eye Rays. The beholder shoots three of the following magical eye rays at random (reroll duplicates), choosing one to three targets it can see within 120 feet of it.'
+      },
+      {
+        name: 'Owlbear',
+        category: 'Monstrosity',
+        size: 'Large',
+        type: 'Monstrosity',
+        alignment: 'Unaligned',
+        ac: '13',
+        hp: '59 (7d10 + 21)',
+        speed: '40 ft.',
+        cr: '3',
+        vulnerabilities: ['fire'],
+        vulnerabilityDetails: {
+          fire: 'Owlbears have thick feathered coats that are highly flammable.'
+        },
+        description: 'An owlbear\'s screech echoes through dark valleys and benighted forests, piercing the quiet night to announce the death of its prey. Feathers cover the thick, shaggy coat of its bearlike body, and the limpid pupils of its great round eyes stare furiously from its owlish head.',
+        abilities: 'Keen Sight and Smell. The owlbear has advantage on Wisdom (Perception) checks that rely on sight or smell.',
+        actions: 'Multiattack. The owlbear makes two attacks: one with its beak and one with its claws.'
+      },
+      {
+        name: 'Werewolf',
+        category: 'Humanoid',
+        size: 'Medium',
+        type: 'Humanoid (human, shapechanger)',
+        alignment: 'Chaotic Evil',
+        ac: '12',
+        hp: '58 (9d8 + 18)',
+        speed: '30 ft. (40 ft. in wolf form)',
+        cr: '3',
+        vulnerabilities: ['silver', 'natural'],
+        vulnerabilityDetails: {
+          silver: 'Werewolves are vulnerable to silvered weapons, which bypass their damage resistances and deal normal damage.',
+          natural: 'Wolfsbane is toxic to werewolves. Exposure causes weakness and prevents transformation.'
+        },
+        description: 'A werewolf is a savage predator that can take three forms: humanoid, wolf, or hybrid. In its humanoid form, a werewolf looks like a normal person, though some have feral features.',
+        abilities: 'Shapechanger. The werewolf can use its action to polymorph into a wolf-humanoid hybrid or into a wolf, or back into its true form, which is humanoid.',
+        actions: 'Multiattack (Humanoid or Hybrid Form Only). The werewolf makes two attacks: two with its spear (humanoid form) or one with its bite and one with its claws (hybrid form).\n\nBite (Wolf or Hybrid Form Only). Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) piercing damage. If the target is a humanoid, it must succeed on a DC 12 Constitution saving throw or be cursed with werewolf lycanthropy.'
+      }
+    ];
+
+    let creatures = [];
+    let selectedCreature = null;
+    let scanner = null;
+    let collapsedCategories = new Set();
+
+    function loadCreatures() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
+      if (!stored) saveCreatures();
+      renderList();
+      if (creatures.length > 0) {
+        selectCreature(creatures[0]);
+      }
+    }
+
+    function saveCreatures() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(creatures));
+    }
+
+    function addCreature(data) {
+      try {
+        const creature = JSON.parse(data);
+        const exists = creatures.some(c => c.name === creature.name);
+        if (!exists) {
+          creatures.push(creature);
+          saveCreatures();
+          renderList();
+          selectCreature(creature);
+        }
+      } catch (e) {
+        alert('Invalid QR code');
+      }
+    }
+
+    function toggleCategory(category) {
+      if (collapsedCategories.has(category)) {
+        collapsedCategories.delete(category);
+      } else {
+        collapsedCategories.add(category);
+      }
+      renderList();
+    }
+
+    function renderList(filter = '') {
+      const list = document.getElementById('creatureList');
+      const grouped = {};
+      
+      CATEGORIES.forEach(cat => grouped[cat] = []);
+      
+      creatures
+        .filter(c => c.name.toLowerCase().includes(filter.toLowerCase()))
+        .forEach(c => {
+          const cat = c.category || 'Monstrosity';
+          if (grouped[cat]) grouped[cat].push(c);
+        });
+
+      list.innerHTML = CATEGORIES.map(category => {
+        const creaturesInCat = grouped[category];
+        if (creaturesInCat.length === 0) return '';
+        
+        const isCollapsed = collapsedCategories.has(category);
+        
+        return `
+          <div class="category ${isCollapsed ? 'collapsed' : ''}">
+            <div class="category-header" onclick="toggleCategory('${category}')">
+              <div class="category-arrow"></div>
+              <div class="category-name">${category}</div>
+              <div class="category-count">${creaturesInCat.length}</div>
+            </div>
+            <div class="category-creatures">
+              ${creaturesInCat.map(c => `
+                <div class="creature-item ${selectedCreature?.name === c.name ? 'active' : ''}" 
+                     onclick='selectCreatureByName("${c.name.replace(/'/g, "\\'")}")'>
+                  ${c.name}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectCreatureByName(name) {
+      const creature = creatures.find(c => c.name === name);
+      if (creature) selectCreature(creature);
+    }
+
+    function selectCreature(creature) {
+      selectedCreature = creature;
+      renderList();
+      showCreature(creature);
+    }
+
+    function showVulnerabilityModal(vulnKey) {
+      const vuln = VULNERABILITY_ICONS[vulnKey];
+      const custom = selectedCreature.vulnerabilityDetails?.[vulnKey];
+      
+      const modal = document.getElementById('modal');
+      const body = document.getElementById('modalBody');
+      
+      body.innerHTML = `
+        <h3>${vuln.icon} ${vuln.name}</h3>
+        <p><strong>Effect:</strong> ${vuln.desc}</p>
+        ${custom ? `<p><strong>Specific to ${selectedCreature.name}:</strong> ${custom}</p>` : ''}
+      `;
+      
+      modal.classList.add('active');
+    }
+
+    function showCreature(creature) {
+      const display = document.getElementById('creatureDisplay');
+      const panel = document.getElementById('infoPanel');
+      const empty = document.getElementById('emptyState');
+      const content = document.getElementById('infoContent');
+
+      empty.style.display = 'none';
+      panel.style.display = 'block';
+
+      const imageHtml = creature.image ? 
+        `<img src="${creature.image}" class="creature-image" alt="${creature.name}">` :
+        `<div style="color:#6a5a4a;font-style:italic;font-size:1.1rem;">No image available</div>`;
+
+      const vulnHtml = (creature.vulnerabilities && creature.vulnerabilities.length > 0) ? `
+        <div class="vulnerabilities-display">
+          ${creature.vulnerabilities.map(v => {
+            const vuln = VULNERABILITY_ICONS[v];
+            return vuln ? `<div class="vuln-icon" onclick="showVulnerabilityModal('${v}')" title="${vuln.name}">${vuln.icon}</div>` : '';
+          }).join('')}
+        </div>
+      ` : '';
+
+      display.innerHTML = imageHtml + vulnHtml;
+
+      content.innerHTML = `
+        <div class="info-title-box">
+          <h2 class="info-title">${creature.name}</h2>
+          <div class="info-subtitle">${creature.size || ''} ${creature.type || ''}, ${creature.alignment || ''}</div>
+        </div>
+
+        <div class="stat-block">
+          <div class="stat-row">
+            <span class="stat-label">Armor Class</span>
+            <span class="stat-value">${creature.ac || '—'}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Hit Points</span>
+            <span class="stat-value">${creature.hp || '—'}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Speed</span>
+            <span class="stat-value">${creature.speed || '—'}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Challenge</span>
+            <span class="stat-value">${creature.cr || '—'}</span>
+          </div>
+        </div>
+
+        ${creature.description ? `
+          <div class="section">
+            <div class="section-title">Description</div>
+            <div class="section-content">${creature.description}</div>
+          </div>
+        ` : ''}
+
+        ${creature.abilities ? `
+          <div class="section">
+            <div class="section-title">Abilities</div>
+            <div class="section-content">${creature.abilities.replace(/\n/g, '<br><br>')}</div>
+          </div>
+        ` : ''}
+
+        ${creature.actions ? `
+          <div class="section">
+            <div class="section-title">Actions</div>
+            <div class="section-content">${creature.actions.replace(/\n/g, '<br><br>')}</div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    document.getElementById('scanBtn').addEventListener('click', async () => {
+      const modal = document.getElementById('modal');
+      const body = document.getElementById('modalBody');
+      
+      body.innerHTML = '<h3>QR CODE SCANNER</h3><div id="qr-reader"></div>';
+      modal.classList.add('active');
+
+      scanner = new Html5Qrcode("qr-reader");
+      try {
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: 250 },
+          (decoded) => {
+            scanner.stop();
+            modal.classList.remove('active');
+            addCreature(decoded);
+          }
+        );
+      } catch (err) {
+        alert('Camera not available');
+        modal.classList.remove('active');
+      }
+    });
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+      if (scanner) {
+        scanner.stop().catch(() => {});
+        scanner = null;
+      }
+      document.getElementById('modal').classList.remove('active');
+    });
+
+    document.getElementById('search').addEventListener('input', (e) => {
+      renderList(e.target.value);
+    });
+
+window.toggleCategory = toggleCategory;
+    window.selectCreatureByName = selectCreatureByName;
+    window.showVulnerabilityModal = showVulnerabilityModal;
+
+    loadCreatures();
+  </script>
+</body>
+</html>
