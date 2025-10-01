@@ -16,6 +16,20 @@
       "abilities": "1",
       "habitat": "1",
       "diet": "1"
+    },
+    {
+      "name": "Darkspawn",
+      "category": "Monstrosity",
+      "size": "Medium",
+      "type": "2",
+      "alignment": "2",
+      "armor": "2",
+      "movement": "2",
+      "temperament": "2",
+      "description": "2",
+      "abilities": "2",
+      "habitat": "2",
+      "diet": "2"
     }
   ]
 }
