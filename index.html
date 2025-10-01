@@ -519,6 +519,8 @@ body {
   <script>
     const STORAGE_KEY = 'bestiary_creatures';
     const CATEGORIES = [
+    const VERSION_KEY = 'bestiary_version';
+    const CURRENT_VERSION = '2.0';
       'Aberration', 'Beast', 'Celestial', 'Construct', 'Dragon',
       'Elemental', 'Fey', 'Fiend', 'Giant', 'Humanoid',
       'Monstrosity', 'Ooze', 'Plant', 'Undead'
@@ -638,10 +640,46 @@ const VULNERABILITY_ICONS = {
     let scanner = null;
     let collapsedCategories = new Set();
 
-    function loadCreatures() {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
-      if (!stored) saveCreatures();
+async function loadCreatures() {
+      // Try to load from online creatures.json first
+      try {
+        const response = await fetch('creatures.json?t=' + Date.now());
+        if (response.ok) {
+          const data = await response.json();
+          if (data.creatures && data.creatures.length > 0) {
+            // Merge with local creatures
+            const stored = localStorage.getItem(STORAGE_KEY);
+            const localCreatures = stored ? JSON.parse(stored) : [];
+            
+            // Add online creatures that aren't already local
+            data.creatures.forEach(onlineCreature => {
+              const exists = localCreatures.some(c => c.name === onlineCreature.name);
+              if (!exists) {
+                localCreatures.push(onlineCreature);
+              }
+            });
+            
+            creatures = localCreatures;
+            saveCreatures();
+          } else {
+            // Fallback to localStorage
+            const stored = localStorage.getItem(STORAGE_KEY);
+            creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
+            if (!stored) saveCreatures();
+          }
+        } else {
+          // Fallback to localStorage
+          const stored = localStorage.getItem(STORAGE_KEY);
+          creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
+          if (!stored) saveCreatures();
+        }
+      } catch (error) {
+        console.log('Could not fetch online creatures, using local storage', error);
+        const stored = localStorage.getItem(STORAGE_KEY);
+        creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
+        if (!stored) saveCreatures();
+      }
+      
       renderList();
       if (creatures.length > 0) {
         selectCreature(creatures[0]);
