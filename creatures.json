@@ -52,6 +52,24 @@
       "category": "Monstrosity",
       "size": "Medium",
       "description": "11"
+    },
+    {
+      "name": "Goblin",
+      "category": "Monstrosity",
+      "size": "Medium",
+      "type": "f",
+      "alignment": "f",
+      "armor": "f",
+      "movement": "f",
+      "temperament": "f",
+      "description": "f",
+      "abilities": "f",
+      "habitat": "f",
+      "diet": "f",
+      "behavior": "f",
+      "lore": "f",
+      "tactics": "f",
+      "notes": "f"
     }
   ]
 }
