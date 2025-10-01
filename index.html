@@ -6,8 +6,11 @@
   <title>Bestiary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <style>
+<link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bestiary">
     * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
       font-family: 'Crimson Text', serif;
@@ -492,8 +495,9 @@ body {
     <div class="search-box">
       <input type="search" id="search" placeholder="Search creatures...">
     </div>
-    <div class="creature-list" id="creatureList"></div>
+<div class="creature-list" id="creatureList"></div>
     <button class="scan-btn" id="scanBtn">Scan QR Code</button>
+    <button class="scan-btn" id="installBtn" style="display: none;">📥 Install App</button>
   </div>
 
   <div class="main-content">
@@ -715,15 +719,19 @@ async function addCreature(data) {
               return;
             }
             
-            const exists = creatures.some(c => c.name === creature.name);
-            if (!exists) {
+const existingIndex = creatures.findIndex(c => c.name === creature.name);
+            if (existingIndex >= 0) {
+              creatures[existingIndex] = creature;
+              saveCreatures();
+              renderList();
+              selectCreature(creature);
+              alert(`${creature.name} updated in your bestiary!`);
+            } else {
               creatures.push(creature);
               saveCreatures();
               renderList();
               selectCreature(creature);
               alert(`${creature.name} added to your bestiary!`);
-            } else {
-              alert(`${creature.name} is already in your bestiary`);
             }
           } catch (fetchError) {
             alert('Could not fetch creature data. Check your internet connection.');
@@ -998,7 +1006,27 @@ window.toggleCategory = toggleCategory;
     window.selectCreatureByName = selectCreatureByName;
     window.showVulnerabilityModal = showVulnerabilityModal;
 
-    loadCreatures();
+loadCreatures();
+
+    // PWA Install prompt
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
   </script>
 </body>
 </html>
