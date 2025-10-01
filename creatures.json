@@ -63,22 +63,31 @@
       "description": "11"
     },
     {
-      "name": "Goblin",
-      "category": "Monstrosity",
-      "size": "Medium",
-      "type": "f",
-      "alignment": "f",
-      "armor": "f",
-      "movement": "f",
-      "temperament": "f",
-      "description": "f",
-      "abilities": "f",
-      "habitat": "f",
-      "diet": "f",
-      "behavior": "f",
-      "lore": "f",
-      "tactics": "f",
-      "notes": "f"
+      "name": "Goblins",
+      "category": "Humanoid",
+      "size": "Small",
+      "type": "Goblinoid",
+      "alignment": "Neutral Evil",
+      "armor": "Patchwork leathers, crude hides, or scavenged mail; not durable but often numerous",
+      "movement": "Nimble and light-footed, capable of darting through forests, caves, and ruins with uncanny speed and agility",
+      "temperament": "Cunning, spiteful, and treacherous; easily cowed by stronger foes but cruel when holding power over the weak",
+      "vulnerabilities": [
+        "sunlight",
+        "fire"
+      ],
+      "vulnerabilityDetails": {
+        "sunlight": "Though not harmed directly, goblins dislike the open day, preferring to fight in shadows, caves, or under the cover of night.",
+        "fire": "Goblins fear fire instinctively, as it destroys their lairs and panics their mounts."
+      },
+      "description": "Goblins are small, wiry humanoids with sharp features, mottled skin, and glowing eyes that pierce the dark. Their voices are shrill and grating, and their laughter is cruel. They live in filthy warrens and camps, preying upon travelers, peasants, and any weaker than themselves. Though individually cowardly, in numbers they can overwhelm even seasoned warriors.",
+      "abilities": "Darkvision, natural stealth, swarming tactics, and the ability to tame and ride wolves or worgs. They are also adept at crafting cruel traps and ambushes.",
+      "habitat": "Goblins thrive in caves, abandoned ruins, dense forests, and desolate hills. Wherever civilization wanes, goblins infest the darkness.",
+      "diet": "Omnivorous scavengers who eat whatever they can steal, hunt, or kill—including carrion and occasionally their own kind.",
+      "behavior": "Petty and quarrelsome, goblins fight among themselves almost as often as they raid outsiders. They serve stronger overlords—hobgoblins, bugbears, orcs, or dark sorcerers—when compelled, but otherwise live in tribes led by the strongest and most brutal.",
+      "lore": "Legends differ as to their origins—some say goblins are the twisted remnants of fey-kind, others that they are spawn of chaos and shadow. Their hatred of light, joy, and beauty is instinctual. To some cultures they are pests to be exterminated; to others, a dire threat that heralds greater wars.",
+      "tactics": "Strike from ambush, raining arrows from hidden vantage points.\n\nUse numbers to swarm and overwhelm isolated targets.\n\nEmploy traps, pitfalls, and snares to weaken enemies before engaging.\n\nRetreat quickly if the battle turns against them, regrouping to attack again later.\n\nWhen mounted on wolves, they harry enemies with hit-and-run attacks, striking from flanks and rear.",
+      "notes": "You'll often find a brooding site for goblins inside their warrens. Goblins breed with a handful of females who rarely leave the nest, thriving on the filth that surrounds them. Goblins can produce a little of 6 or 7 every few months, attributing to their number. Goblin offspring that fail to thrive are often eaten by the mothers.",
+      "image": "https://github.com/oathbounddnd/bestiary/blob/main/images/Goblin.png"
     }
   ]
 }
