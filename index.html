@@ -518,13 +518,13 @@ body {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script>
 const STORAGE_KEY = 'bestiary_creatures';
-    const VERSION_KEY = 'bestiary_version';
-    const CURRENT_VERSION = '2.0';
-    const CATEGORIES = [
-      'Aberration', 'Beast', 'Celestial', 'Construct', 'Dragon',
-      'Elemental', 'Fey', 'Fiend', 'Giant', 'Humanoid',
-      'Monstrosity', 'Ooze', 'Plant', 'Undead'
-    ];
+const VERSION_KEY = 'bestiary_version';
+const CURRENT_VERSION = '2.0';
+const CATEGORIES = [
+  'Aberration', 'Beast', 'Celestial', 'Construct', 'Dragon',
+  'Elemental', 'Fey', 'Fiend', 'Giant', 'Humanoid',
+  'Monstrosity', 'Ooze', 'Plant', 'Undead'
+];
 
 const VULNERABILITY_ICONS = {
       acid: { icon: '💧', name: 'Acid', desc: 'Takes extra damage from acid.' },
@@ -641,14 +641,17 @@ const VULNERABILITY_ICONS = {
     let collapsedCategories = new Set();
 
 async function loadCreatures() {
+      // Try to load from online creatures.json first
       try {
         const response = await fetch('creatures.json?t=' + Date.now());
         if (response.ok) {
           const data = await response.json();
           if (data.creatures && data.creatures.length > 0) {
+            // Merge with local creatures
             const stored = localStorage.getItem(STORAGE_KEY);
             const localCreatures = stored ? JSON.parse(stored) : [];
             
+            // Add online creatures that aren't already local
             data.creatures.forEach(onlineCreature => {
               const exists = localCreatures.some(c => c.name === onlineCreature.name);
               if (!exists) {
@@ -659,17 +662,19 @@ async function loadCreatures() {
             creatures = localCreatures;
             saveCreatures();
           } else {
+            // Fallback to localStorage
             const stored = localStorage.getItem(STORAGE_KEY);
             creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
             if (!stored) saveCreatures();
           }
         } else {
+          // Fallback to localStorage
           const stored = localStorage.getItem(STORAGE_KEY);
           creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
           if (!stored) saveCreatures();
         }
       } catch (error) {
-        console.log('Could not fetch online creatures', error);
+        console.log('Could not fetch online creatures, using local storage', error);
         const stored = localStorage.getItem(STORAGE_KEY);
         creatures = stored ? JSON.parse(stored) : [...SAMPLE_CREATURES];
         if (!stored) saveCreatures();
@@ -685,11 +690,9 @@ async function loadCreatures() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(creatures));
     }
 
-function addCreature(data) {
+async function addCreature(data) {
       try {
-        // Check if data is a URL
         if (data.startsWith('http://') || data.startsWith('https://')) {
-          // It's a URL from the admin panel - extract creature ID and fetch data
           const url = new URL(data);
           const creatureId = url.searchParams.get('id');
           
@@ -698,26 +701,35 @@ function addCreature(data) {
             return;
           }
           
-          // Try to get creature data from localStorage
-          const stored = localStorage.getItem(`creature_${creatureId}`);
-          if (!stored) {
-            alert('Creature data not found. Make sure you scanned from the same device/browser as the admin panel, or use the Download button on the creature page.');
+          try {
+            const response = await fetch('creatures.json?t=' + Date.now());
+            const jsonData = await response.json();
+            
+            const creature = jsonData.creatures.find(c => {
+              const id = c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              return id === creatureId;
+            });
+            
+            if (!creature) {
+              alert('Creature not found in database.');
+              return;
+            }
+            
+            const exists = creatures.some(c => c.name === creature.name);
+            if (!exists) {
+              creatures.push(creature);
+              saveCreatures();
+              renderList();
+              selectCreature(creature);
+              alert(`${creature.name} added to your bestiary!`);
+            } else {
+              alert(`${creature.name} is already in your bestiary`);
+            }
+          } catch (fetchError) {
+            alert('Could not fetch creature data. Check your internet connection.');
             return;
           }
-          
-          const creature = JSON.parse(stored);
-          const exists = creatures.some(c => c.name === creature.name);
-          if (!exists) {
-            creatures.push(creature);
-            saveCreatures();
-            renderList();
-            selectCreature(creature);
-            alert(`${creature.name} added to your bestiary!`);
-          } else {
-            alert(`${creature.name} is already in your bestiary`);
-          }
         } else {
-          // It's direct JSON data
           const creature = JSON.parse(data);
           const exists = creatures.some(c => c.name === creature.name);
           if (!exists) {
