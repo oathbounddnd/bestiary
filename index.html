@@ -16,19 +16,45 @@ body {
       height: 100vh;
       overflow: hidden;
       display: flex;
+      touch-action: pan-y;
     }
-    .sidebar {
+.sidebar {
       width: 260px;
       background: linear-gradient(90deg, rgba(15,12,10,0.95), rgba(10,8,6,0.85));
       border-right: 1px solid rgba(100,80,60,0.3);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      transition: transform 0.3s ease;
     }
-    .header {
+    
+    /* Mobile: sidebar slides in from left */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 100;
+        transform: translateX(-100%);
+        width: 280px;
+        max-width: 85vw;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+.header {
       padding: 15px;
       border-bottom: 1px solid rgba(100,80,60,0.3);
       text-align: center;
+      position: relative;
+    }
+    
+    @media (max-width: 768px) {
+      .header {
+        padding-top: 60px;
+      }
     }
     .header h1 {
       font-family: 'Cinzel', serif;
@@ -36,6 +62,46 @@ body {
       color: #c9b896;
       letter-spacing: 3px;
       text-transform: uppercase;
+    }
+    
+    /* Mobile menu button */
+    .menu-btn {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 200;
+      padding: 8px 12px;
+      background: rgba(15,12,10,0.95);
+      border: 1px solid rgba(100,80,60,0.5);
+      color: #c9b896;
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    @media (max-width: 768px) {
+      .menu-btn {
+        display: block;
+      }
+    }
+    
+    /* Overlay for mobile sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 99;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar-overlay.active {
+        display: block;
+      }
     }
     .search-box {
       padding: 12px;
@@ -62,7 +128,7 @@ body {
     .category {
       margin-bottom: 2px;
     }
-    .category-header {
+.category-header {
       padding: 6px 15px;
       cursor: pointer;
       display: flex;
@@ -70,9 +136,13 @@ body {
       gap: 8px;
       transition: background 0.2s;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .category-header:hover {
       background: rgba(40,35,30,0.3);
+    }
+    .category-header:active {
+      background: rgba(50,40,30,0.5);
     }
     .category-arrow {
       width: 0;
@@ -105,23 +175,27 @@ body {
     .category.collapsed .category-creatures {
       max-height: 0;
     }
-    .creature-item {
+.creature-item {
       padding: 5px 15px 5px 30px;
       cursor: pointer;
       border-left: 2px solid transparent;
       transition: all 0.15s;
       font-size: 0.9rem;
+      -webkit-tap-highlight-color: transparent;
     }
     .creature-item:hover {
       background: rgba(40,35,30,0.4);
       border-left-color: rgba(150,120,80,0.6);
+    }
+    .creature-item:active {
+      background: rgba(50,40,30,0.6);
     }
     .creature-item.active {
       background: rgba(50,40,30,0.6);
       border-left-color: #c9b896;
       color: #c9b896;
     }
-    .scan-btn {
+.scan-btn {
       margin: 12px;
       padding: 10px;
       background: rgba(80,60,40,0.3);
@@ -133,17 +207,29 @@ body {
       cursor: pointer;
       transition: all 0.2s;
       font-size: 0.85rem;
+      -webkit-tap-highlight-color: transparent;
     }
     .scan-btn:hover {
       background: rgba(100,75,50,0.4);
       border-color: rgba(150,120,80,0.7);
     }
-    .main-content {
+    .scan-btn:active {
+      transform: scale(0.98);
+    }
+.main-content {
       flex: 1;
       display: flex;
       position: relative;
+      overflow: hidden;
     }
-    .creature-display {
+    
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+        width: 100%;
+      }
+    }
+.creature-display {
       flex: 1;
       display: flex;
       align-items: center;
@@ -152,20 +238,42 @@ body {
       flex-direction: column;
       gap: 30px;
       padding: 30px;
+      overflow-y: auto;
     }
-    .creature-image {
+    
+    @media (max-width: 768px) {
+      .creature-display {
+        padding: 80px 15px 15px;
+        gap: 20px;
+        min-height: 40vh;
+      }
+    }
+.creature-image {
       max-width: 60%;
       max-height: 55vh;
       object-fit: contain;
       filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));
     }
-    .vulnerabilities-display {
+    
+    @media (max-width: 768px) {
+      .creature-image {
+        max-width: 85%;
+        max-height: 35vh;
+      }
+    }
+.vulnerabilities-display {
       display: flex;
       gap: 15px;
       flex-wrap: wrap;
       justify-content: center;
     }
-    .vuln-icon {
+    
+    @media (max-width: 768px) {
+      .vulnerabilities-display {
+        gap: 10px;
+      }
+    }
+.vuln-icon {
       width: 60px;
       height: 60px;
       background: rgba(0,0,0,0.6);
@@ -178,6 +286,7 @@ body {
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+      -webkit-tap-highlight-color: transparent;
     }
     .vuln-icon:hover {
       border-color: rgba(150,120,80,0.8);
@@ -185,12 +294,39 @@ body {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.3);
     }
-    .info-panel {
+    
+    @media (max-width: 768px) {
+      .vuln-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.6rem;
+      }
+      .vuln-icon:active {
+        transform: scale(0.95);
+      }
+    }
+    .vuln-icon:hover {
+      border-color: rgba(150,120,80,0.8);
+      background: rgba(20,15,10,0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.3);
+    }
+.info-panel {
       width: 380px;
       background: linear-gradient(270deg, rgba(15,12,10,0.95), rgba(10,8,6,0.85));
       border-left: 1px solid rgba(100,80,60,0.3);
       overflow-y: auto;
       padding: 25px;
+    }
+    
+    @media (max-width: 768px) {
+      .info-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid rgba(100,80,60,0.3);
+        padding: 20px 15px;
+        max-height: 60vh;
+      }
     }
     .info-title-box {
       background: rgba(0,0,0,0.4);
@@ -223,6 +359,8 @@ body {
       justify-content: space-between;
       padding: 6px 0;
       border-bottom: 1px solid rgba(100,80,60,0.2);
+      gap: 15px;
+      align-items: flex-start;
     }
     .stat-row:last-child {
       border-bottom: none;
@@ -232,11 +370,15 @@ body {
       text-transform: uppercase;
       font-size: 0.8rem;
       letter-spacing: 1px;
+      flex-shrink: 0;
+      min-width: 90px;
     }
     .stat-value {
       color: #d4c5a0;
       font-weight: 600;
       font-size: 0.9rem;
+      text-align: right;
+      flex: 1;
     }
     .section {
       margin-bottom: 20px;
@@ -281,7 +423,7 @@ body {
       justify-content: center;
     }
     .modal.active { display: flex; }
-    .modal-content {
+.modal-content {
       background: rgba(20,15,10,0.98);
       border: 2px solid rgba(100,80,60,0.6);
       padding: 25px;
@@ -291,7 +433,16 @@ body {
       max-height: 80vh;
       overflow-y: auto;
     }
-    .modal-close {
+    
+    @media (max-width: 768px) {
+      .modal-content {
+        width: 95%;
+        max-width: none;
+        padding: 20px;
+        max-height: 90vh;
+      }
+    }
+.modal-close {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -304,9 +455,13 @@ body {
       font-family: 'Cinzel', serif;
       text-transform: uppercase;
       letter-spacing: 1px;
+      -webkit-tap-highlight-color: transparent;
     }
     .modal-close:hover {
       background: rgba(100,75,50,0.4);
+    }
+    .modal-close:active {
+      transform: scale(0.95);
     }
     .modal h3 {
       font-family: 'Cinzel', serif;
@@ -327,7 +482,10 @@ body {
   </style>
 </head>
 <body>
-  <div class="sidebar">
+  <button class="menu-btn" id="menuBtn">☰ Menu</button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  
+  <div class="sidebar" id="sidebar">
     <div class="header">
       <h1>Bestiary</h1>
     </div>
@@ -366,7 +524,7 @@ body {
       'Monstrosity', 'Ooze', 'Plant', 'Undead'
     ];
 
-    const VULNERABILITY_ICONS = {
+const VULNERABILITY_ICONS = {
       acid: { icon: '💧', name: 'Acid', desc: 'Takes extra damage from acid.' },
       bludgeoning: { icon: '🔨', name: 'Bludgeoning', desc: 'Takes extra damage from blunt force attacks.' },
       cold: { icon: '❄️', name: 'Cold', desc: 'Takes extra damage from cold and ice.' },
@@ -380,8 +538,11 @@ body {
       radiant: { icon: '☀️', name: 'Radiant', desc: 'Takes extra damage from holy light.' },
       slashing: { icon: '⚔️', name: 'Slashing', desc: 'Takes extra damage from slashing weapons.' },
       thunder: { icon: '🌩️', name: 'Thunder', desc: 'Takes extra damage from sonic booms.' },
-      silver: { icon: '🪙', name: 'Silver', desc: 'Vulnerable to silvered weapons.' },
+      silver: { icon: '🌙', name: 'Silver', desc: 'Vulnerable to silvered weapons.' },
+      sunlight: { icon: '🌞', name: 'Sunlight', desc: 'Vulnerable to direct sunlight.' },
       natural: { icon: '🌿', name: 'Natural Materials', desc: 'Vulnerable to specific natural substances (wolfsbane, running water, etc.).' },
+      metal: { icon: '⚙️', name: 'Specific Metals', desc: 'Vulnerable to certain metals (silver, iron, cold iron, etc.).' },
+      crafted: { icon: '🔧', name: 'Crafted Materials', desc: 'Vulnerable to specific non-natural materials (blessed items, magical constructs, etc.).' },
       blinded: { icon: '👁️', name: 'Blinded', desc: 'Vulnerable when blinded.' },
       charmed: { icon: '💖', name: 'Charmed', desc: 'Vulnerable to charm effects.' },
       deafened: { icon: '👂', name: 'Deafened', desc: 'Vulnerable when deafened.' },
@@ -397,69 +558,78 @@ body {
         size: 'Gargantuan',
         type: 'Dragon',
         alignment: 'Chaotic Evil',
-        ac: '22',
-        hp: '546 (28d20 + 252)',
-        speed: '40 ft., climb 40 ft., fly 80 ft.',
-        cr: '24',
+        armor: 'Thick crimson scales, nearly impenetrable',
+        movement: 'Swift on ground, can climb sheer cliffs, soars majestically through the sky',
+        temperament: 'Aggressive and territorial',
         vulnerabilities: ['cold'],
         vulnerabilityDetails: {
           cold: 'Red dragons despise cold and take additional damage from ice attacks.'
         },
-        description: 'The most covetous of the true dragons, red dragons tirelessly seek to increase their treasure hoards. They are exceptionally vain, even for dragons, and their conceit is reflected in their proud bearing and their disdain for other creatures.',
-        abilities: 'Legendary Resistance (3/Day). If the dragon fails a saving throw, it can choose to succeed instead.',
-        actions: 'Multiattack. The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws.\n\nFire Breath (Recharge 5-6). The dragon exhales fire in a 90-foot cone. Each creature in that area must make a DC 24 Dexterity saving throw, taking 91 (26d6) fire damage on a failed save, or half as much damage on a successful one.'
+        description: 'The most covetous of the true dragons, red dragons tirelessly seek to increase their treasure hoards. They are exceptionally vain, even for dragons, and their conceit is reflected in their proud bearing and their disdain for other creatures. Their scales shine like polished rubies, and smoke constantly wisps from their nostrils.',
+        abilities: 'Possesses an almost supernatural will that allows it to shrug off magical effects that would fell lesser creatures. Its mere presence can strike terror into the hearts of even the bravest warriors. The dragon can sense the location of precious metals and gems within its territory.',
+        habitat: 'Ancient red dragons make their lairs in high mountain peaks, volcanic regions, and deep caverns filled with geothermal vents. They prefer locations where the heat is intense and the air shimmers with thermal waves.',
+        diet: 'Carnivorous apex predator. Prefers large game such as cattle, horses, and unfortunately, humans. Known to occasionally consume precious gems, which are believed to strengthen their scales.',
+        behavior: 'Extremely territorial and will attack anything that enters its domain without permission. Spends much of its time sleeping atop its hoard or patrolling its territory from the skies. Occasionally accepts tributes from nearby settlements in exchange for peace.',
+        lore: 'Legends speak of ancient red dragons living for thousands of years, their hoards growing to legendary proportions. Some tales claim that the oldest red dragons can speak the true names of fire itself, commanding flames with but a thought. One famous red dragon, Infernatrix the Eternal, is said to have laid waste to three kingdoms before finally being driven into the deep mountains.'
       },
-      {
+{
         name: 'Beholder',
         category: 'Aberration',
         size: 'Large',
         type: 'Aberration',
         alignment: 'Lawful Evil',
-        ac: '18',
-        hp: '180 (19d10 + 76)',
-        speed: '0 ft., fly 20 ft. (hover)',
-        cr: '13',
+        armor: 'Thick chitinous hide',
+        movement: 'Levitates slowly through the air, never touching the ground',
+        temperament: 'Paranoid and xenophobic',
         vulnerabilities: [],
-        description: 'One glance at a beholder is enough to assess its foul and otherworldly nature. Aggressive, hateful, and greedy, these aberrations dismiss all other creatures as lesser beings, toying with them or destroying them as they choose.',
-        abilities: 'Antimagic Cone. The beholder\'s central eye creates an area of antimagic, as in the antimagic field spell, in a 150-foot cone.',
-        actions: 'Eye Rays. The beholder shoots three of the following magical eye rays at random (reroll duplicates), choosing one to three targets it can see within 120 feet of it.'
+        description: 'One glance at a beholder is enough to assess its foul and otherworldly nature. A bulbous floating orb dominated by a massive central eye and a gaping maw filled with razor-sharp teeth. Ten eyestalks writhe from the top of its body, each containing a smaller eye that glows with eldritch power. Aggressive, hateful, and greedy, these aberrations dismiss all other creatures as lesser beings.',
+        abilities: 'Each of its ten eyestalks can project a different magical effect - some can disintegrate matter, others can turn flesh to stone, and still others can dominate minds or induce sleep. Its massive central eye projects an area where magic itself ceases to function, making it immune to most spellcasting. The creature never truly sleeps, instead entering a semi-dormant state where some eyes remain alert.',
+        habitat: 'Beholders claim deep underground lairs in the Underdark, often in large caverns they reshape using their disintegration rays. They prefer locations where they can survey all approaches and create elaborate mazes of tunnels. Some are known to float in the void between dimensions.',
+        diet: 'Omnivorous but prefers live prey. Uses its disintegration ray to reduce meals to manageable portions. Known to keep certain victims alive as entertainment or slaves.',
+        behavior: 'Supremely paranoid and narcissistic. Each beholder believes itself to be the perfect example of beholderkind and views all other creatures - even other beholders - as inferior. They scheme constantly and trust nothing. Will often attack on sight unless a creature can offer something of significant value.',
+        lore: 'Scholars debate whether beholders dream themselves into existence or if they are spawned from some nightmare realm beyond comprehension. It is said that when a beholder dreams of another beholder, that dream can manifest as a real creature - but the dreamer will inevitably view the spawn as an abomination and seek to destroy it. Ancient texts warn that some beholders have learned to manipulate reality itself through dream magic.'
       },
-      {
+{
         name: 'Owlbear',
         category: 'Monstrosity',
         size: 'Large',
         type: 'Monstrosity',
         alignment: 'Unaligned',
-        ac: '13',
-        hp: '59 (7d10 + 21)',
-        speed: '40 ft.',
-        cr: '3',
+        armor: 'Thick feathered hide',
+        movement: 'Surprisingly fast runner despite its bulk',
+        temperament: 'Territorial and aggressive',
         vulnerabilities: ['fire'],
         vulnerabilityDetails: {
           fire: 'Owlbears have thick feathered coats that are highly flammable.'
         },
-        description: 'An owlbear\'s screech echoes through dark valleys and benighted forests, piercing the quiet night to announce the death of its prey. Feathers cover the thick, shaggy coat of its bearlike body, and the limpid pupils of its great round eyes stare furiously from its owlish head.',
-        abilities: 'Keen Sight and Smell. The owlbear has advantage on Wisdom (Perception) checks that rely on sight or smell.',
-        actions: 'Multiattack. The owlbear makes two attacks: one with its beak and one with its claws.'
+        description: 'An owlbear\'s screech echoes through dark valleys and benighted forests, piercing the quiet night to announce the death of its prey. Feathers cover the thick, shaggy coat of its bearlike body, and the limpid pupils of its great round eyes stare furiously from its owlish head. Standing over eight feet tall, these creatures are a bizarre fusion of two apex predators.',
+        abilities: 'Possesses exceptional vision and can hunt effectively even in near-total darkness. Its sense of smell rivals that of any bloodhound. When it has prey in its grasp, it will crush and tear with both beak and claws simultaneously in a devastating embrace.',
+        habitat: 'Dense forests, particularly old growth with thick canopies. Sometimes found in cave systems at forest edges. They claim large territories, typically several square miles, and mark the boundaries with deep claw marks on trees and scattered remains of prey.',
+        diet: 'Carnivorous and will eat almost any meat. Prefers deer, boar, and other large forest animals, but will eagerly attack travelers, livestock, or anything else that enters its territory. Known to cache excess kills in hollow trees or shallow graves.',
+        behavior: 'Fiercely protective of their territory and especially their young. Most active during twilight hours. They are not pack hunters but mated pairs will cooperate to defend their nesting grounds. The distinctive screech serves both as a hunting cry and a warning to rivals.',
+        lore: 'Sages debate whether owlbears are the result of ancient wizards\' experiments or some cruel trick of the gods. Local folklore warns travelers to flee immediately upon hearing their cry, as few who stand their ground survive the encounter. Some druidic circles speak of a primal owlbear spirit that embodies the savagery of the wild.'
       },
-      {
+{
         name: 'Werewolf',
         category: 'Humanoid',
         size: 'Medium',
-        type: 'Humanoid (human, shapechanger)',
+        type: 'Humanoid (shapechanger)',
         alignment: 'Chaotic Evil',
-        ac: '12',
-        hp: '58 (9d8 + 18)',
-        speed: '30 ft. (40 ft. in wolf form)',
-        cr: '3',
+        armor: 'Tough hide when transformed, heals rapidly from most wounds',
+        movement: 'Moves with predatory grace, significantly faster in wolf form',
+        temperament: 'Savage and cunning',
         vulnerabilities: ['silver', 'natural'],
         vulnerabilityDetails: {
           silver: 'Werewolves are vulnerable to silvered weapons, which bypass their damage resistances and deal normal damage.',
           natural: 'Wolfsbane is toxic to werewolves. Exposure causes weakness and prevents transformation.'
         },
-        description: 'A werewolf is a savage predator that can take three forms: humanoid, wolf, or hybrid. In its humanoid form, a werewolf looks like a normal person, though some have feral features.',
-        abilities: 'Shapechanger. The werewolf can use its action to polymorph into a wolf-humanoid hybrid or into a wolf, or back into its true form, which is humanoid.',
-        actions: 'Multiattack (Humanoid or Hybrid Form Only). The werewolf makes two attacks: two with its spear (humanoid form) or one with its bite and one with its claws (hybrid form).\n\nBite (Wolf or Hybrid Form Only). Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) piercing damage. If the target is a humanoid, it must succeed on a DC 12 Constitution saving throw or be cursed with werewolf lycanthropy.'
+        description: 'A werewolf is a savage predator cursed to walk between two worlds. In humanoid form, they often appear as normal people, though some retain feral features - extra body hair, prominent canines, or eyes that reflect light like an animal\'s. When the beast takes hold, they transform into a hulking hybrid creature or a massive wolf, driven by primal hunger.',
+        abilities: 'Can shift between three forms: human, wolf, and a terrifying hybrid form that combines the worst aspects of both. In hybrid form, they stand upright but possess the claws, fangs, and strength of a great predator. Their bite carries a terrible curse that can spread the lycanthropic affliction to others. They possess regenerative abilities that allow them to recover from most wounds, though silver and certain herbs can prevent this healing.',
+        habitat: 'Werewolves often dwell on the fringes of civilization - in frontier towns, isolated farmsteads, or deep forests near settlements. They require access to both human society (for their cursed human side) and wild hunting grounds (for their beast nature). Many are drawn to forested regions with abundant prey.',
+        diet: 'While in human form, they eat normally. Once transformed, they become ravenous carnivores with a particular hunger for human flesh. Many werewolves wake the morning after a full moon with no memory of their nocturnal hunts, only the taste of blood and the screams echoing in their nightmares.',
+        behavior: 'Most werewolves struggle with their dual nature. Some embrace the beast and hunt willingly. Others fight against the curse, isolating themselves during full moons or seeking cures. When transformed, they are overcome by predatory instincts and hunt with the cunning of a human mind and the savagery of a wolf. They often hunt in packs with natural wolves, who recognize them as alpha predators.',
+        lore: 'The curse of lycanthropy is said to originate from an ancient pact with dark powers or as punishment from nature gods for hunters who showed no respect for the wilderness. Silver\'s effectiveness against werewolves is attributed to the metal\'s connection to the moon. Wolfsbane, a toxic purple flower, is both a ward against werewolves and a component in various suppression remedies. Village elders tell of ways to break the curse: killing the werewolf that inflicted the bite, breaking the curse through powerful magic, or according to some tales, acts of true selflessness or love.',
+        tactics: 'In combat, werewolves use their ability to shift forms tactically. They may ambush prey in wolf form for speed, transform to hybrid form to maximize their combat effectiveness, then flee in wolf form if overwhelmed. They target the weakest members of a group first and attempt to spread their curse through bites.'
       }
     ];
 
@@ -572,13 +742,17 @@ body {
       modal.classList.add('active');
     }
 
-    function showCreature(creature) {
+function showCreature(creature) {
       const display = document.getElementById('creatureDisplay');
       const panel = document.getElementById('infoPanel');
-      const empty = document.getElementById('emptyState');
       const content = document.getElementById('infoContent');
 
-      empty.style.display = 'none';
+      // Hide empty state if it exists
+      const empty = document.getElementById('emptyState');
+      if (empty) {
+        empty.style.display = 'none';
+      }
+      
       panel.style.display = 'block';
 
       const imageHtml = creature.image ? 
@@ -596,29 +770,27 @@ body {
 
       display.innerHTML = imageHtml + vulnHtml;
 
-      content.innerHTML = `
+     content.innerHTML = `
         <div class="info-title-box">
           <h2 class="info-title">${creature.name}</h2>
           <div class="info-subtitle">${creature.size || ''} ${creature.type || ''}, ${creature.alignment || ''}</div>
         </div>
 
-        <div class="stat-block">
+<div class="stat-block">
           <div class="stat-row">
-            <span class="stat-label">Armor Class</span>
-            <span class="stat-value">${creature.ac || '—'}</span>
+            <span class="stat-label">Armor</span>
+            <span class="stat-value">${creature.armor || creature.ac || '—'}</span>
           </div>
           <div class="stat-row">
-            <span class="stat-label">Hit Points</span>
-            <span class="stat-value">${creature.hp || '—'}</span>
+            <span class="stat-label">Movement</span>
+            <span class="stat-value">${creature.movement || creature.speed || '—'}</span>
           </div>
+          ${creature.temperament ? `
           <div class="stat-row">
-            <span class="stat-label">Speed</span>
-            <span class="stat-value">${creature.speed || '—'}</span>
+            <span class="stat-label">Temperament</span>
+            <span class="stat-value">${creature.temperament}</span>
           </div>
-          <div class="stat-row">
-            <span class="stat-label">Challenge</span>
-            <span class="stat-value">${creature.cr || '—'}</span>
-          </div>
+          ` : ''}
         </div>
 
         ${creature.description ? `
@@ -635,10 +807,45 @@ body {
           </div>
         ` : ''}
 
-        ${creature.actions ? `
+        ${creature.habitat ? `
           <div class="section">
-            <div class="section-title">Actions</div>
-            <div class="section-content">${creature.actions.replace(/\n/g, '<br><br>')}</div>
+            <div class="section-title">Habitat</div>
+            <div class="section-content">${creature.habitat.replace(/\n/g, '<br><br>')}</div>
+          </div>
+        ` : ''}
+
+        ${creature.diet ? `
+          <div class="section">
+            <div class="section-title">Diet</div>
+            <div class="section-content">${creature.diet.replace(/\n/g, '<br><br>')}</div>
+          </div>
+        ` : ''}
+
+        ${creature.behavior ? `
+          <div class="section">
+            <div class="section-title">Behavior</div>
+            <div class="section-content">${creature.behavior.replace(/\n/g, '<br><br>')}</div>
+          </div>
+        ` : ''}
+
+        ${creature.lore ? `
+          <div class="section">
+            <div class="section-title">Lore & Myths</div>
+            <div class="section-content">${creature.lore.replace(/\n/g, '<br><br>')}</div>
+          </div>
+        ` : ''}
+
+        ${creature.tactics ? `
+          <div class="section">
+            <div class="section-title">Combat Tactics</div>
+            <div class="section-content">${creature.tactics.replace(/\n/g, '<br><br>')}</div>
+          </div>
+        ` : ''}
+
+        ${creature.notes ? `
+          <div class="section">
+            <div class="section-title">Additional Notes</div>
+            <div class="section-content">${creature.notes.replace(/\n/g, '<br><br>')}</div>
           </div>
         ` : ''}
       `;
@@ -676,9 +883,36 @@ body {
       document.getElementById('modal').classList.remove('active');
     });
 
-    document.getElementById('search').addEventListener('input', (e) => {
+document.getElementById('search').addEventListener('input', (e) => {
       renderList(e.target.value);
     });
+
+    // Mobile menu toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+    
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+    
+    menuBtn.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', closeSidebar);
+    
+    // Close sidebar when creature is selected on mobile
+    const originalSelectCreature = selectCreature;
+    selectCreature = function(creature) {
+      originalSelectCreature(creature);
+      if (window.innerWidth <= 768) {
+        closeSidebar();
+      }
+    };
 
 window.toggleCategory = toggleCategory;
     window.selectCreatureByName = selectCreatureByName;
