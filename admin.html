@@ -306,21 +306,37 @@
   </div>
 
   <script>
-    const ADMIN_STORAGE_KEY = 'bestiary_admin_creatures';
-    let creatures = [];
+let creatures = [];
     let editingIndex = -1;
     let baseURL = window.location.origin + window.location.pathname.replace('admin.html', '');
 
-    // Load creatures
-    function loadCreatures() {
-      const stored = localStorage.getItem(ADMIN_STORAGE_KEY);
-      creatures = stored ? JSON.parse(stored) : [];
-      renderList();
+    // Load creatures from JSON file
+    async function loadCreatures() {
+      try {
+        const response = await fetch('creatures.json');
+        const data = await response.json();
+        creatures = data.creatures || [];
+        renderList();
+      } catch (error) {
+        console.error('Error loading creatures:', error);
+        creatures = [];
+        renderList();
+      }
     }
 
-    // Save creatures
+    // Save creatures - download as JSON file
     function saveCreatures() {
-      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(creatures));
+      const data = { creatures: creatures };
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'creatures.json';
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      alert('creatures.json downloaded! Upload this file to your GitHub repository to update the live site.');
     }
 
     // Render creature list
@@ -450,14 +466,11 @@
       closeEditModal();
     });
 
-    // Generate QR code
+// Generate QR code
     function generateQR(index) {
       const creature = creatures[index];
       const creatureId = creature.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const url = `${baseURL}creature.html?id=${creatureId}`;
-      
-      // Store creature data for the public page
-      localStorage.setItem(`creature_${creatureId}`, JSON.stringify(creature));
       
       // Clear previous QR
       document.getElementById('qrcode').innerHTML = '';
