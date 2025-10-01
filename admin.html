@@ -305,15 +305,30 @@
     </div>
   </div>
 
-  <script>
-let creatures = [];
+ <script>
+    let creatures = [];
     let editingIndex = -1;
     let baseURL = window.location.origin + window.location.pathname.replace('admin.html', '');
+    let githubToken = localStorage.getItem('github_token') || '';
+    const GITHUB_OWNER = 'oathbounddnd';  // Your GitHub username
+    const GITHUB_REPO = 'bestiary';        // Your repo name
+    const GITHUB_BRANCH = 'main';          // Usually 'main' or 'gh-pages'
+
+    // Check if token is set
+    if (!githubToken) {
+      const token = prompt('Enter your GitHub Personal Access Token (this will be stored locally):\n\nCreate one at: https://github.com/settings/tokens');
+      if (token) {
+        localStorage.setItem('github_token', token);
+        githubToken = token;
+      } else {
+        alert('GitHub token required for auto-save. You can add it later by refreshing the page.');
+      }
+    }
 
     // Load creatures from JSON file
     async function loadCreatures() {
       try {
-        const response = await fetch('creatures.json');
+        const response = await fetch('creatures.json?t=' + Date.now()); // Cache bust
         const data = await response.json();
         creatures = data.creatures || [];
         renderList();
@@ -324,19 +339,65 @@ let creatures = [];
       }
     }
 
-    // Save creatures - download as JSON file
-    function saveCreatures() {
+    // Save creatures to GitHub
+    async function saveCreatures() {
+      if (!githubToken) {
+        alert('GitHub token not set. Please refresh the page and enter your token.');
+        return;
+      }
+
       const data = { creatures: creatures };
       const jsonStr = JSON.stringify(data, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'creatures.json';
-      link.click();
-      URL.revokeObjectURL(url);
-      
-      alert('creatures.json downloaded! Upload this file to your GitHub repository to update the live site.');
+      const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+      try {
+        // Get current file SHA
+        const getResponse = await fetch(
+          `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/creatures.json?ref=${GITHUB_BRANCH}`,
+          {
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }
+        );
+
+        let sha = '';
+        if (getResponse.ok) {
+          const fileData = await getResponse.json();
+          sha = fileData.sha;
+        }
+
+        // Update file
+        const updateResponse = await fetch(
+          `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/creatures.json`,
+          {
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: 'Update creatures.json',
+              content: base64Content,
+              sha: sha,
+              branch: GITHUB_BRANCH
+            })
+          }
+        );
+
+        if (updateResponse.ok) {
+          alert('✓ Saved! Changes will be live in ~30 seconds.');
+        } else {
+          const error = await updateResponse.json();
+          console.error('GitHub API error:', error);
+          alert('Error saving to GitHub: ' + (error.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error saving creatures:', error);
+        alert('Error saving to GitHub. Check console for details.');
+      }
     }
 
     // Render creature list
@@ -378,7 +439,6 @@ let creatures = [];
       document.getElementById('temperament').value = c.temperament || '';
       document.getElementById('vulnerabilities').value = (c.vulnerabilities || []).join(', ');
       
-      // Format vulnerability details
       let vulnDetailsText = '';
       if (c.vulnerabilityDetails) {
         vulnDetailsText = Object.entries(c.vulnerabilityDetails)
@@ -406,7 +466,7 @@ let creatures = [];
     }
 
     // Save creature
-    document.getElementById('creatureForm').addEventListener('submit', (e) => {
+    document.getElementById('creatureForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const vulnerabilities = document.getElementById('vulnerabilities').value
@@ -461,21 +521,19 @@ let creatures = [];
         creatures.push(creature);
       }
 
-      saveCreatures();
+      await saveCreatures();
       renderList();
       closeEditModal();
     });
 
-// Generate QR code
+    // Generate QR code
     function generateQR(index) {
       const creature = creatures[index];
       const creatureId = creature.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const url = `${baseURL}creature.html?id=${creatureId}`;
       
-      // Clear previous QR
       document.getElementById('qrcode').innerHTML = '';
       
-      // Generate QR
       new QRCode(document.getElementById('qrcode'), {
         text: url,
         width: 400,
@@ -500,6 +558,19 @@ let creatures = [];
         }
       });
     });
+
+    // Add button to reset token
+    const controls = document.querySelector('.controls');
+    const resetTokenBtn = document.createElement('button');
+    resetTokenBtn.textContent = 'Reset GitHub Token';
+    resetTokenBtn.style.marginTop = '10px';
+    resetTokenBtn.onclick = () => {
+      if (confirm('Reset your GitHub token?')) {
+        localStorage.removeItem('github_token');
+        location.reload();
+      }
+    };
+    controls.appendChild(resetTokenBtn);
 
     loadCreatures();
   </script>
