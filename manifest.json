@@ -1,0 +1,17 @@
+{
+  "name": "D&D Bestiary",
+  "short_name": "Bestiary",
+  "description": "Your personal D&D creature bestiary",
+  "start_url": "/bestiary/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230a0a0a' width='512' height='512'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='256' fill='%23c9b896'>🐉</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
