@@ -46,6 +46,12 @@
       "description": "1",
       "abilities": "1",
       "habitat": "1"
+    },
+    {
+      "name": "Octopus",
+      "category": "Monstrosity",
+      "size": "Medium",
+      "description": "11"
     }
   ]
 }
