@@ -652,18 +652,53 @@ const VULNERABILITY_ICONS = {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(creatures));
     }
 
-    function addCreature(data) {
+function addCreature(data) {
       try {
-        const creature = JSON.parse(data);
-        const exists = creatures.some(c => c.name === creature.name);
-        if (!exists) {
-          creatures.push(creature);
-          saveCreatures();
-          renderList();
-          selectCreature(creature);
+        // Check if data is a URL
+        if (data.startsWith('http://') || data.startsWith('https://')) {
+          // It's a URL from the admin panel - extract creature ID and fetch data
+          const url = new URL(data);
+          const creatureId = url.searchParams.get('id');
+          
+          if (!creatureId) {
+            alert('Invalid creature URL');
+            return;
+          }
+          
+          // Try to get creature data from localStorage
+          const stored = localStorage.getItem(`creature_${creatureId}`);
+          if (!stored) {
+            alert('Creature data not found. Make sure you scanned from the same device/browser as the admin panel, or use the Download button on the creature page.');
+            return;
+          }
+          
+          const creature = JSON.parse(stored);
+          const exists = creatures.some(c => c.name === creature.name);
+          if (!exists) {
+            creatures.push(creature);
+            saveCreatures();
+            renderList();
+            selectCreature(creature);
+            alert(`${creature.name} added to your bestiary!`);
+          } else {
+            alert(`${creature.name} is already in your bestiary`);
+          }
+        } else {
+          // It's direct JSON data
+          const creature = JSON.parse(data);
+          const exists = creatures.some(c => c.name === creature.name);
+          if (!exists) {
+            creatures.push(creature);
+            saveCreatures();
+            renderList();
+            selectCreature(creature);
+            alert(`${creature.name} added to your bestiary!`);
+          } else {
+            alert(`${creature.name} is already in your bestiary`);
+          }
         }
       } catch (e) {
-        alert('Invalid QR code');
+        alert('Invalid QR code: ' + e.message);
       }
     }
 
