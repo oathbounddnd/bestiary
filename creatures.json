@@ -1,3 +1,21 @@
 {
-  "creatures": []
+  "creatures": [
+    {
+      "name": "Test",
+      "category": "Monstrosity",
+      "size": "Medium",
+      "type": "1",
+      "alignment": "1",
+      "armor": "1",
+      "movement": "1",
+      "temperament": "1",
+      "vulnerabilities": [
+        "1"
+      ],
+      "description": "1",
+      "abilities": "1",
+      "habitat": "1",
+      "diet": "1"
+    }
+  ]
 }
