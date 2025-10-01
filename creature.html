@@ -147,10 +147,10 @@
       loadCreature(creatureId);
     }
 
-    async function loadCreature(id) {
+async function loadCreature(id) {
       try {
-        // Fetch creatures from JSON file
-        const response = await fetch('creatures.json');
+        // Fetch creatures from JSON file with cache-busting
+        const response = await fetch('creatures.json?t=' + Date.now());
         const data = await response.json();
         
         // Find creature by ID
