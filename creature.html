@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bestiary Creature</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Crimson Text', serif;
+      background: #0a0a0a;
+      color: #d4c5a0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+    }
+    h1 {
+      font-family: 'Cinzel', serif;
+      text-align: center;
+      color: #c9b896;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+      font-size: 2rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #8a7a5a;
+      font-style: italic;
+      margin-bottom: 30px;
+    }
+    .creature-image {
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      margin-bottom: 30px;
+      filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));
+    }
+    .info-box {
+      background: rgba(20,15,10,0.8);
+      border: 1px solid rgba(100,80,60,0.3);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .info-title {
+      font-family: 'Cinzel', serif;
+      color: #c9b896;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(100,80,60,0.3);
+      padding-bottom: 5px;
+    }
+    .info-content {
+      line-height: 1.6;
+      color: #b5a585;
+    }
+    .download-btn {
+      width: 100%;
+      padding: 20px;
+      background: rgba(80,60,40,0.5);
+      border: 2px solid rgba(120,90,60,0.5);
+      color: #c9b896;
+      font-family: 'Cinzel', serif;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 30px 0;
+    }
+    .download-btn:hover {
+      background: rgba(100,75,50,0.6);
+      border-color: rgba(150,120,80,0.7);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+    .download-btn:active {
+      transform: translateY(0);
+    }
+    .vulnerabilities {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .vuln-badge {
+      background: rgba(80,40,40,0.5);
+      border: 1px solid rgba(120,60,60,0.5);
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    .error {
+      text-align: center;
+      color: #c9b896;
+      padding: 40px;
+    }
+    .stat-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(100,80,60,0.2);
+    }
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+    .stat-label {
+      color: #8a7a5a;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+    .stat-value {
+      color: #d4c5a0;
+      font-weight: 600;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="content">
+    <div class="error">Loading creature...</div>
+  </div>
+
+  <script>
+    // Get creature ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const creatureId = urlParams.get('id');
+
+    if (!creatureId) {
+      document.getElementById('content').innerHTML = '<div class="error"><h2>Error</h2><p>No creature ID provided</p></div>';
+    } else {
+      loadCreature(creatureId);
+    }
+
+    function loadCreature(id) {
+      // Try to load from localStorage (if on same domain as admin)
+      const stored = localStorage.getItem(`creature_${id}`);
+      
+      if (!stored) {
+        document.getElementById('content').innerHTML = '<div class="error"><h2>Creature Not Found</h2><p>This creature may have been removed or the link is invalid.</p></div>';
+        return;
+      }
+
+      const creature = JSON.parse(stored);
+      displayCreature(creature);
+    }
+
+    function displayCreature(creature) {
+      const imageHtml = creature.image ? 
+        `<img src="${creature.image}" class="creature-image" alt="${creature.name}">` : '';
+
+      const vulnHtml = creature.vulnerabilities && creature.vulnerabilities.length > 0 ?
+        `<div class="vulnerabilities">
+          ${creature.vulnerabilities.map(v => `<span class="vuln-badge">${v}</span>`).join('')}
+        </div>` : '';
+
+      let html = `
+        <h1>${creature.name}</h1>
+        <div class="subtitle">${creature.size || ''} ${creature.type || ''}, ${creature.alignment || ''}</div>
+        
+        ${imageHtml}
+
+        <button class="download-btn" onclick="downloadToApp()">📥 Download to Bestiary App</button>
+
+        <div class="info-box">
+          <div class="stat-grid">
+            ${creature.armor ? `
+              <div class="stat-row">
+                <span class="stat-label">Armor</span>
+                <span class="stat-value">${creature.armor}</span>
+              </div>
+            ` : ''}
+            ${creature.movement ? `
+              <div class="stat-row">
+                <span class="stat-label">Movement</span>
+                <span class="stat-value">${creature.movement}</span>
+              </div>
+            ` : ''}
+            ${creature.temperament ? `
+              <div class="stat-row">
+                <span class="stat-label">Temperament</span>
+                <span class="stat-value">${creature.temperament}</span>
+              </div>
+            ` : ''}
+          </div>
+          ${creature.vulnerabilities && creature.vulnerabilities.length > 0 ? `
+            <div style="margin-top: 15px;">
+              <div class="stat-label" style="margin-bottom: 8px;">Vulnerabilities</div>
+              ${vulnHtml}
+            </div>
+          ` : ''}
+        </div>
+
+        ${creature.description ? `
+          <div class="info-box">
+            <div class="info-title">Description</div>
+            <div class="info-content">${creature.description}</div>
+          </div>
+        ` : ''}
+
+        ${creature.abilities ? `
+          <div class="info-box">
+            <div class="info-title">Abilities</div>
+            <div class="info-content">${creature.abilities}</div>
+          </div>
+        ` : ''}
+
+        ${creature.habitat ? `
+          <div class="info-box">
+            <div class="info-title">Habitat</div>
+            <div class="info-content">${creature.habitat}</div>
+          </div>
+        ` : ''}
+
+        ${creature.diet ? `
+          <div class="info-box">
+            <div class="info-title">Diet</div>
+            <div class="info-content">${creature.diet}</div>
+          </div>
+        ` : ''}
+
+        ${creature.behavior ? `
+          <div class="info-box">
+            <div class="info-title">Behavior</div>
+            <div class="info-content">${creature.behavior}</div>
+          </div>
+        ` : ''}
+
+        ${creature.lore ? `
+          <div class="info-box">
+            <div class="info-title">Lore & Myths</div>
+            <div class="info-content">${creature.lore}</div>
+          </div>
+        ` : ''}
+
+        ${creature.tactics ? `
+          <div class="info-box">
+            <div class="info-title">Combat Tactics</div>
+            <div class="info-content">${creature.tactics}</div>
+          </div>
+        ` : ''}
+
+        ${creature.notes ? `
+          <div class="info-box">
+            <div class="info-title">Additional Notes</div>
+            <div class="info-content">${creature.notes}</div>
+          </div>
+        ` : ''}
+      `;
+
+      document.getElementById('content').innerHTML = html;
+      
+      // Store creature data for download
+      window.creatureData = creature;
+    }
+
+    function downloadToApp() {
+      if (!window.creatureData) {
+        alert('Error: Creature data not loaded');
+        return;
+      }
+
+      // Create a deep link URL that the mobile app can intercept
+      const appScheme = 'bestiary://add';
+      const jsonData = JSON.stringify(window.creatureData);
+      const encodedData = encodeURIComponent(jsonData);
+      
+      // Try to open the app with deep link
+      const deepLink = `${appScheme}?data=${encodedData}`;
+      window.location.href = deepLink;
+      
+      // Fallback: Download as JSON file for manual import
+      setTimeout(() => {
+        const dataStr = JSON.stringify(window.creatureData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${window.creatureData.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        alert('If the app didn\'t open, a JSON file has been downloaded. You can import it manually in the app.');
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
