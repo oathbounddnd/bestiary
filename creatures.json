@@ -21,15 +21,24 @@
       "name": "Darkspawn",
       "category": "Monstrosity",
       "size": "Medium",
-      "type": "2",
-      "alignment": "2",
-      "armor": "2",
-      "movement": "2",
-      "temperament": "2",
-      "description": "2",
-      "abilities": "2",
-      "habitat": "2",
-      "diet": "2"
+      "type": "Darkspawn",
+      "alignment": "Chaotic Evil",
+      "armor": "Corrupted flesh hardened by the taint, often supplemented by crude but effective scavenged armor",
+      "movement": "Tireless marchers through tunnels and ruins, capable of swarming prey with relentless pursuit",
+      "temperament": "Bloodthirsty, hive-minded, and utterly merciless",
+      "vulnerabilities": [
+        "sunlight"
+      ],
+      "vulnerabilityDetails": {
+        "sunlight": "The taint recoils from bright sunlight, it prefers the depths of the Deep Roads in shadow."
+      },
+      "description": "The darkspawn are twisted mockeries of men and beasts, corrupted by the Blight and driven by a singular will to spread it. Their skin is pallid or ashen, their eyes glow with a sickly light, and their presence carries the stench of rot and corruption. They emerge in endless hordes, guided by the call of the Old Gods they seek to unearth.",
+      "abilities": "Resistance to pain and fatigue, darkvision in the deep roads, and the ability to spread the Taint through wounds and blood. Certain breeds wield sorcery born of corruption, while larger ones possess terrifying brute strength.",
+      "habitat": "The Deep Roads—vast subterranean tunnels carved by the dwarves, now overrun by darkness. From here, they surge upward during Blights, spreading across the surface world like a plague.",
+      "diet": "They feed on the flesh of the living and sometimes the dead, though hunger does not drive them as strongly as their compulsion to corrupt and destroy.",
+      "behavior": "Swarming in coordinated packs, they fight without fear of death, for each darkspawn is but a vessel of the Blight. They are relentless in pursuit, cunning in ambush, and always seeking to unearth the sleeping Old Gods.",
+      "lore": "Scholars claim the darkspawn were once men, dwarves, and elves who defiled the Golden City in arrogance, cursed forever by the Maker into these foul forms. They are the heralds of Blights—when an Old God is corrupted into an Archdemon, the darkspawn rise in unstoppable numbers, drowning the world in shadow until either the Archdemon is slain or civilization falls.",
+      "image": "https://oathbounddnd.github.io/bestiary/images/dragon.png"
     },
     {
       "name": "Dragon",
