@@ -147,17 +147,28 @@
       loadCreature(creatureId);
     }
 
-    function loadCreature(id) {
-      // Try to load from localStorage (if on same domain as admin)
-      const stored = localStorage.getItem(`creature_${id}`);
-      
-      if (!stored) {
-        document.getElementById('content').innerHTML = '<div class="error"><h2>Creature Not Found</h2><p>This creature may have been removed or the link is invalid.</p></div>';
-        return;
-      }
+    async function loadCreature(id) {
+      try {
+        // Fetch creatures from JSON file
+        const response = await fetch('creatures.json');
+        const data = await response.json();
+        
+        // Find creature by ID
+        const creature = data.creatures.find(c => {
+          const creatureId = c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          return creatureId === id;
+        });
+        
+        if (!creature) {
+          document.getElementById('content').innerHTML = '<div class="error"><h2>Creature Not Found</h2><p>This creature may have been removed or the link is invalid.</p></div>';
+          return;
+        }
 
-      const creature = JSON.parse(stored);
-      displayCreature(creature);
+        displayCreature(creature);
+      } catch (error) {
+        console.error('Error loading creature:', error);
+        document.getElementById('content').innerHTML = '<div class="error"><h2>Error Loading Creature</h2><p>Could not load creature data. Please try again.</p></div>';
+      }
     }
 
     function displayCreature(creature) {
